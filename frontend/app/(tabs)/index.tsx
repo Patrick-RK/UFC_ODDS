@@ -11,6 +11,7 @@ interface Fight {
 interface FightEvent {
   date: string;
   eventName: string;
+  url:string;
   location: string;
   card: Fight[];
 }
