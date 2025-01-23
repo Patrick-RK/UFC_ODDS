@@ -13,7 +13,7 @@ const MatchTable: React.FC = () => {
   useEffect(() => {
     const fetchEventData = async () => {
       try {
-        axios.defaults.baseURL = 'http://localhost:4000'; // Set base URL for all axios requests
+        axios.defaults.baseURL = 'http://localhost:3000'; // Set base URL for all axios requests
 
         // Fetch events from the database
         const response = await axios.get('/api/events'); // Replace with your API endpoint
