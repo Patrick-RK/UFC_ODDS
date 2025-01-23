@@ -2,11 +2,11 @@ import { z } from 'zod';
 
 // Define the 'Event' schema
 export const eventSchema = z.object({
-  id: z.number().int().optional(), // Primary key
-  name: z.string(),
-  url: z.string(),
-  date: z.string(), // or `z.date()` if you want to parse date objects
-  location: z.string(),
+  eventId: z.number().int().optional(), // Primary key
+  eventName: z.string(),
+  eventUrl: z.string(),
+  eventDate: z.string(), // or `z.date()` if you want to parse date objects
+  eventLocation: z.string(),
 });
 
 export const fightSchema = z.object({
