@@ -1,39 +1,46 @@
-import React, { useEffect, useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 
 interface Event {
-  id: number;
-  eventName: string;
-  eventDate: string;
-  eventLocation: string;
-  placeholder1: string;
-  placeholder2: string;
-  createdAt: string;
-  updatedAt: string;
+  [key: string]: any; // Dynamic keys based on the database schema
 }
 
-const EventTable: React.FC = () => {
-  const [events, setEvents] = useState<Event[]>([]);
+const MatchTable: React.FC = () => {
+  const [events, setEvents] = useState<Event[]>([]); // Store events fetched from the database
+  const [columns, setColumns] = useState<string[]>([]); // Store column names dynamically
 
+  // Fetch event data and dynamically determine the columns
   useEffect(() => {
-    const fetchEvents = async () => {
+    const fetchEventData = async () => {
       try {
-        const response = await axios.get('http://localhost:4000/api/events');
-        setEvents(response.data);
+        axios.defaults.baseURL = 'http://localhost:4000'; // Set base URL for all axios requests
+
+        // Fetch events from the database
+        const response = await axios.get('/api/events'); // Replace with your API endpoint
+        const eventData = response.data;
+
+        if (eventData.length > 0) {
+          // Dynamically determine column names from the first event
+          const columnNames = Object.keys(eventData[0]);
+          setColumns(columnNames);
+        }
+
+        setEvents(eventData); // Store event data
       } catch (error) {
-        console.error('Error fetching events:', error);
+        console.error('Error fetching event data:', error);
       }
     };
 
-    fetchEvents();
-  }, []);
+    fetchEventData(); // Call the function to fetch data
+  }, []); // Run once when the component mounts
 
   return (
-    <div style={{ margin: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif' }}>
-      <h1>Saved Events</h1>
+    <div style={{ margin: '20px', textAlign: 'center', fontFamily: 'Arial, sans-serif', backgroundColor: 'white', color: 'black' }}>
+      <h1 style={{ marginBottom: '20px' }}>Event Table</h1>
+
       <table
         style={{
-          width: '90%',
+          width: '80%',
           margin: '0 auto',
           borderCollapse: 'collapse',
           boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
@@ -43,36 +50,44 @@ const EventTable: React.FC = () => {
       >
         <thead>
           <tr style={{ backgroundColor: '#f5f5f5' }}>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>ID</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Event Name</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Event Date</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Event Location</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Placeholder 1</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Placeholder 2</th>
-            <th style={{ padding: '12px', fontWeight: 'bold', border: '1px solid #ddd' }}>Created At</th>
+            {/* Dynamically generate table headers */}
+            {columns.map((column, index) => (
+              <th
+                key={index}
+                style={{
+                  padding: '12px',
+                  fontWeight: 'bold',
+                  borderBottom: '2px solid #ddd',
+                  textTransform: 'capitalize', // Make column names more readable
+                }}
+              >
+                {column.replace(/([A-Z])/g, ' $1')} {/* Format camelCase to spaced */}
+              </th>
+            ))}
           </tr>
         </thead>
         <tbody>
+          {/* Render event data dynamically */}
           {events.length > 0 ? (
-            events.map((event) => (
-              <tr key={event.id}>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{event.id}</td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{event.eventName}</td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>
-                  {new Date(event.eventDate).toLocaleDateString()}
-                </td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{event.eventLocation}</td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{event.placeholder1}</td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>{event.placeholder2}</td>
-                <td style={{ padding: '10px', textAlign: 'center', border: '1px solid #ddd' }}>
-                  {new Date(event.createdAt).toLocaleString()}
-                </td>
+            events.map((event, rowIndex) => (
+              <tr key={rowIndex} style={{ borderBottom: '1px solid #ddd' }}>
+                {columns.map((column, colIndex) => (
+                  <td
+                    key={colIndex}
+                    style={{
+                      padding: '12px',
+                      textAlign: 'center',
+                    }}
+                  >
+                    {event[column]} {/* Render value for the column */}
+                  </td>
+                ))}
               </tr>
             ))
           ) : (
             <tr>
-              <td colSpan={7} style={{ padding: '15px', textAlign: 'center', border: '1px solid #ddd' }}>
-                No events available.
+              <td colSpan={columns.length} style={{ padding: '15px', textAlign: 'center' }}>
+                No data available.
               </td>
             </tr>
           )}
@@ -82,4 +97,4 @@ const EventTable: React.FC = () => {
   );
 };
 
-export default EventTable;
+export default MatchTable;
